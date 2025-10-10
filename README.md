@@ -111,7 +111,7 @@ To run this project locally, ensure you have Flutter installed and configured.
 
 ## 🤝 Contribution Guide
 
-We welcome contributions! Please check the [Issues]([LINK_TO_ISSUES_PAGE]) tab for tasks ranging from UI polish to new feature development.
+We welcome contributions! Please check the [Issues]([https://github.com/ossdaiict/SLoP5.0-App-Development/issues]) tab for tasks ranging from UI polish to new feature development.
 
 ### How to Contribute
 
