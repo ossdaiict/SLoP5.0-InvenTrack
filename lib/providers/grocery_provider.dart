@@ -74,6 +74,11 @@ class GroceryProvider with ChangeNotifier {
     }
 
     final updatedItem = item.copyWith(quantity: newQuantity);
-    await updateItem(updatedItem); // This will update DB and notifyListeners
+    if(newQuantity == 0) {
+      // Delete item from DB and list
+      await deleteItem(item.id!);
+    } else {
+      await updateItem(updatedItem); // This will update DB and notifyListeners
+    }
   }
 }
