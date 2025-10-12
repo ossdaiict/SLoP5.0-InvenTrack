@@ -16,7 +16,7 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('GrocyTrack 🧺'),
+        title: const Text('IvenTrack 🧺'),
         actions: [
           // Optional: A button to refresh the list manually
           IconButton(
