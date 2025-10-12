@@ -1,5 +1,7 @@
 // lib/widgets/grocery_card.dart
 
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // You'll need to add the intl package
 import 'package:iventrack/providers/grocery_provider.dart';
@@ -102,63 +104,73 @@ class GroceryCard extends StatelessWidget {
 
   // Modal Dialog for entering consumption amount
   void _showConsumeDialog(BuildContext context, GroceryItem item) {
-  int amount = 1; // initial counter value
-  final TextEditingController controller = TextEditingController(text: amount.toString());
+  final TextEditingController controller = TextEditingController(text: '1');
+  double availableQuantity = item.quantity;
 
   showDialog(
     context: context,
-    builder: (_) => StatefulBuilder(
-      builder: (context, setState) => AlertDialog(
-        title: const Text('Consume Item'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Counter row
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+    builder: (context) {
+      return AlertDialog(
+        title: Text('Consume ${item.name}'),
+        content: StatefulBuilder(
+          builder: (context, setState) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // Minus button
-                IconButton(
-                  icon: const Icon(Icons.remove_circle_outline),
-                  onPressed: () {
-                    if (amount > 1) {
-                      setState(() {
-                        amount--;
-                        controller.text = amount.toString();
-                      });
-                    }
-                  },
+                Text(
+                  'Available: ${availableQuantity.toStringAsFixed(2)} ${item.unit}',
+                  style: const TextStyle(fontSize: 14, color: Colors.grey),
                 ),
-                // Editable TextField
-                SizedBox(
-                  width: 50,
-                  child: TextField(
-                    controller: controller,
-                    keyboardType: TextInputType.number,
-                    textAlign: TextAlign.center,
-                    onChanged: (value) {
-                      final parsed = int.tryParse(value);
-                      if (parsed != null && parsed > 0) {
-                        setState(() {
-                          amount = parsed;
-                        });
-                      }
-                    },
-                  ),
-                ),
-                // Plus button
-                IconButton(
-                  icon: const Icon(Icons.add_circle_outline),
-                  onPressed: () {
-                    setState(() {
-                      amount++;
-                      controller.text = amount.toString();
-                    });
-                  },
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Decrease button
+                    IconButton(
+                      icon: const Icon(Icons.remove_circle_outline),
+                      onPressed: () {
+                        double current = double.tryParse(controller.text) ?? 0;
+                        if (current > 0) {
+                          setState(() => controller.text = (current - 1).toString());
+                        }
+                      },
+                    ),
+                    // TextField for manual entry
+                    SizedBox(
+                      width: 60,
+                      child: TextField(
+                        controller: controller,
+                        keyboardType: TextInputType.number,
+                        textAlign: TextAlign.center,
+                        decoration: const InputDecoration(
+                          isDense: true,
+                          contentPadding: EdgeInsets.symmetric(vertical: 8),
+                        ),
+                      ),
+                    ),
+                    // Increase button
+                    IconButton(
+                      icon: const Icon(Icons.add_circle_outline),
+                      onPressed: () {
+                        double current = double.tryParse(controller.text) ?? 0;
+                        if (current < availableQuantity) {
+                          setState(() => controller.text = (current + 1).toString());
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Cannot exceed available quantity (${availableQuantity.toStringAsFixed(2)} ${item.unit})',
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  ],
                 ),
               ],
-            ),
-          ],
+            );
+          },
         ),
         actions: [
           TextButton(
@@ -167,29 +179,33 @@ class GroceryCard extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () async {
-              await context.read<GroceryProvider>().markAsUsed(item, amount.toDouble());
+              final amount = double.tryParse(controller.text) ?? 1;
+              if (amount > availableQuantity) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Cannot consume more than available quantity!')),
+                );
+                return;
+              }
+
+              await context.read<GroceryProvider>().markAsUsed(item, amount);
               Navigator.pop(context);
 
-              // Check if item still exists
-              final provider = context.read<GroceryProvider>();
-              final exists = provider.items.any((i) => i.id == item.id);
-
-
-              if (!exists) {
+              final updatedQuantity = item.quantity - amount;
+              if (updatedQuantity <= 0) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('${item.name} used up and removed!')),
+                  SnackBar(content: Text('${item.name} used up and removed')),
                 );
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('${item.name} used ($amount)')),
+                  SnackBar(content: Text('${item.name} used ($amount ${item.unit})')),
                 );
               }
             },
             child: const Text('Confirm'),
           ),
         ],
-      ),
-    ),
+      );
+    },
   );
 }
 
