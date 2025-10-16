@@ -7,7 +7,7 @@ import 'screens/home_screen.dart';
 import 'services/notification_service.dart';
 
 final NotificationService notificationService = NotificationService();
-
+  
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 

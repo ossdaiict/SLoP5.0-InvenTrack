@@ -8,6 +8,7 @@ import 'package:iventrack/providers/grocery_provider.dart';
 import 'package:provider/provider.dart';
 import '../models/grocery_item.dart';
 import '../screens/edit_item_screen.dart';
+import 'dart:io';
 
 class GroceryCard extends StatelessWidget {
   final GroceryItem item;
@@ -34,9 +35,19 @@ class GroceryCard extends StatelessWidget {
       expiryColor = Colors.green;
     }
 
+    //low quantinty flag logic
+     final bool isLowStock = item.quantity <= 1;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       elevation: 1.5,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: isLowStock
+          ? const BorderSide(color: Colors.deepOrange, width: 2)
+          : BorderSide.none,
+      ),
+      color: isLowStock ? Colors.deepOrange.shade50 : Colors.white,
       child: ListTile(
         onTap: () {
           // Navigate to the edit screen
@@ -46,16 +57,48 @@ class GroceryCard extends StatelessWidget {
             ),
           );
         },
-        leading: CircleAvatar(
-          backgroundColor: expiryColor.withOpacity(0.1),
-          child: Icon(
-            days < 0 ? Icons.error_outline : Icons.shopping_bag,
-            color: expiryColor,
-          ),
+        leading: Stack(
+          alignment: Alignment.center,  
+          children: [
+            //show image if exists
+            if(item.imagePath != null && item.imagePath!.isNotEmpty) 
+              ClipRRect(
+                borderRadius: BorderRadius.circular(25),
+                child: Image.file(
+                  File(item.imagePath!),
+                  width: 50,
+                  height: 50,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, StackTrace) =>
+                    const Icon(Icons.broken_image, size: 40, color: Colors.grey),
+                ),
+              ) else 
+              CircleAvatar(
+                backgroundColor: expiryColor.withOpacity(0.1),
+                child: Icon(
+                  days < 0 ? Icons.error_outline : Icons.shopping_bag,
+                  color: expiryColor,
+                ),
+              ),
+
+            if(isLowStock) 
+            const Positioned(
+              right: -2,
+              top: -2,
+              child: Icon(
+                Icons.warning_amber_rounded,
+                color: Colors.deepOrange,
+                size: 16, 
+              ),
+            ),
+          ],
         ),
         title: Text(
           item.name,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: isLowStock ? Colors.deepOrange.shade700 : Colors.black,
+            ),
         ),
         subtitle: Text(
             'Category: ${item.category}\nAdded: ${DateFormat.yMd().format(item.createdAt)}'),
@@ -71,7 +114,7 @@ class GroceryCard extends StatelessWidget {
                   '${item.quantity.toStringAsFixed(item.quantity.truncateToDouble() == item.quantity ? 0 : 2)} ${item.unit}',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: item.quantity <= 1 ? Colors.deepOrange : Colors.black,
+                    color: isLowStock ? Colors.deepOrange.shade700 : Colors.black,
                   ),
                 ),
                 const SizedBox(height: 4),

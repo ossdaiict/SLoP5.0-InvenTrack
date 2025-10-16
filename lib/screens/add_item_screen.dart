@@ -1,11 +1,12 @@
 // lib/screens/add_item_screen.dart
-
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../models/grocery_item.dart';
 import '../providers/grocery_provider.dart';
 import '../utils/constants.dart';
+import 'package:image_picker/image_picker.dart';
 
 class AddItemScreen extends StatefulWidget {
   const AddItemScreen({super.key});
@@ -23,7 +24,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
   String _selectedCategory = Constants.categories.first;
   String _selectedUnit = Constants.units.first;
   DateTime? _selectedExpiryDate;
-
+  File? _pickedImage;
   // Cleanup controllers
   @override
   void dispose() {
@@ -48,6 +49,18 @@ class _AddItemScreenState extends State<AddItemScreen> {
     }
   }
 
+  // Pick image from gallery
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _pickedImage = File(pickedFile.path);
+      });
+    }
+  }
+
   // Form submission logic
   void _submitForm() {
     if (_formKey.currentState!.validate() && _selectedExpiryDate != null) {
@@ -68,7 +81,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
         unit: _selectedUnit,
         expiryDate: _selectedExpiryDate!,
         createdAt: DateTime.now(),
-        imagePath: null, // Placeholder for image path
+        imagePath: _pickedImage?.path, // Placeholder for image path
       );
 
       // Call the provider to add the item
@@ -99,6 +112,21 @@ class _AddItemScreenState extends State<AddItemScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
+              Center(
+                child: GestureDetector(
+                  onTap: _pickImage,
+                  child: CircleAvatar(
+                    radius: 50,
+                    backgroundColor: Colors.grey.shade300,
+                    backgroundImage:
+                        _pickedImage != null ? FileImage(_pickedImage!) : null,
+                    child: _pickedImage == null
+                        ? const Icon(Icons.camera_alt, size: 40, color: Colors.white)
+                        : null,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(
