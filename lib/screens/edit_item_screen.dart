@@ -1,11 +1,12 @@
 // lib/screens/edit_item_screen.dart
-
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../models/grocery_item.dart';
 import '../providers/grocery_provider.dart';
 import '../utils/constants.dart';
+import 'package:image_picker/image_picker.dart';
 
 class EditItemScreen extends StatefulWidget {
   final GroceryItem item;
@@ -25,6 +26,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
   late String _selectedCategory;
   late String _selectedUnit;
   late DateTime _selectedExpiryDate;
+  File? _selectedImage;
 
   @override
   void initState() {
@@ -61,6 +63,18 @@ class _EditItemScreenState extends State<EditItemScreen> {
     }
   }
 
+  Future<void> _pickImage() async {
+  final picker = ImagePicker();
+  final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+  if (pickedFile != null) {
+    setState(() {
+      _selectedImage = File(pickedFile.path);
+    });
+  }
+}
+
+
   // Form submission logic for updating an item
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
@@ -81,6 +95,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
         quantity: quantity,
         unit: _selectedUnit,
         expiryDate: _selectedExpiryDate,
+        imagePath: _selectedImage != null ? _selectedImage!.path : widget.item.imagePath,
         // imagePath and createdAt remain the same
       );
 
@@ -142,6 +157,46 @@ class _EditItemScreenState extends State<EditItemScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
+              //Image Picker Section
+              Center(
+                child: GestureDetector(
+                  onTap: _pickImage,
+                  child: _selectedImage != null
+                    ? ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.file(
+                        _selectedImage!,
+                        height: 120,
+                        width: 120,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                    : (widget.item.imagePath != null
+                        ? ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.file(
+                            File(widget.item.imagePath!),
+                            height: 120,
+                            width: 120,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : Container(
+                        height: 120,
+                        width: 120,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.camera_alt,
+                         size: 40, color: Colors.grey),
+                    )),
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+                const Center(child: Text('Tap image to change')),
+              const SizedBox(height: 20),
               // Item Name
               TextFormField(
                 controller: _nameController,
