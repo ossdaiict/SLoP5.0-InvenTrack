@@ -18,11 +18,57 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('IvenTrack 🧺'),
         actions: [
-          // Optional: A button to refresh the list manually
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => groceryProvider.loadItems(),
+
+          // Sorting popup menu
+
+          PopupMenuButton<SortOption>(
+            icon: Icon(Icons.sort, 
+            color: Colors.green.shade600,
+            ),
+            shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+           ),
+            color: Theme.of(context).colorScheme.surface,
+            onSelected: (SortOption selectedOption) {
+              groceryProvider.sortItems(selectedOption);
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: SortOption.expiryDate,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Expiry Date'),
+                    if (groceryProvider.currentSort == SortOption.expiryDate)
+                      Icon(Icons.check, color: Colors.green.shade600),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: SortOption.name,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Sort by Name (A-Z)'),
+                    if (groceryProvider.currentSort == SortOption.name)
+                      Icon(Icons.check, color: Colors.green.shade600),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: SortOption.quantity,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Sort by Quantity (High to Low)'),
+                    if (groceryProvider.currentSort == SortOption.quantity)
+                      Icon(Icons.check, color: Colors.green.shade600),
+                  ],
+                ),
+              ),
+            ],
           ),
+          // Dropdown for sorting option
         ],
       ),
       body: groceryProvider.isLoading
@@ -62,6 +108,7 @@ class HomeScreen extends StatelessWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'addFab',
         onPressed: () {
           // Navigate to the screen to add a new item
           Navigator.of(context).push(
