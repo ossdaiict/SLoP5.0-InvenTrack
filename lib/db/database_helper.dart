@@ -1,5 +1,6 @@
 // lib/db/database_helper.dart
 
+import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../models/grocery_item.dart';
@@ -89,9 +90,16 @@ class DatabaseHelper {
     final db = await database;
     return await db.delete(
       Constants.tableName,
-      where: '${Constants.id} = ?',
+      where: '${Constants.id} = ?', 
       whereArgs: [id],
     );
+  }
+
+  // Securely delete all groceries
+  Future<void> deleteAllGroceries() async {
+    final db = await database;
+    await db.delete(Constants.tableName);
+    debugPrint(" All grocery records deleted from the database.");
   }
 
   // Close the database connection (optional, good practice)

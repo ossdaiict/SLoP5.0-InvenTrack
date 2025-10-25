@@ -107,4 +107,10 @@ class GroceryProvider with ChangeNotifier {
     }
     notifyListeners();
   }
+  //  Delete all grocery items (used in SettingsScreen)
+  Future<void> deleteAllItems() async {
+    await _dbHelper.deleteAllGroceries();
+    _items.clear();
+    notifyListeners();
+  }
 }

@@ -1,6 +1,7 @@
 // lib/screens/edit_item_screen.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../models/grocery_item.dart';
@@ -220,14 +221,24 @@ class _EditItemScreenState extends State<EditItemScreen> {
                     flex: 3,
                     child: TextFormField(
                       controller: _quantityController,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly, // only allow digits
+                      ],
                       decoration: const InputDecoration(
                         labelText: 'Quantity',
                         border: OutlineInputBorder(),
                       ),
                       validator: (value) {
-                        if (value == null || double.tryParse(value) == null) {
-                          return 'Enter a number';
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a quantity.';
+                        }
+                        final quantity = int.tryParse(value);
+                        if (quantity == null) {
+                          return 'Please enter a valid number.';
+                        }
+                        if(quantity <= 0) {
+                          return 'Quantity must be greater than zero.';
                         }
                         return null;
                       },
