@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../providers/grocery_provider.dart';
 import '../screens/add_item_screen.dart';
 import '../widgets/grocery_card.dart'; // We'll create this next
+import 'settings_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -68,7 +69,20 @@ class HomeScreen extends StatelessWidget {
               ),
             ],
           ),
-          // Dropdown for sorting option
+          // Settings button
+          IconButton(
+            icon: Icon(
+              Icons.settings,
+              color: Colors.green.shade600,
+            ),
+            tooltip: 'Settings',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen())
+              );
+            },
+          ),
         ],
       ),
       body: groceryProvider.isLoading

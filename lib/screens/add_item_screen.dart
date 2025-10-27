@@ -1,6 +1,7 @@
 // lib/screens/add_item_screen.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../models/grocery_item.dart';
@@ -67,7 +68,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
       final name = _nameController.text.trim();
       final quantity = double.tryParse(_quantityController.text) ?? 0.0;
 
-      if (quantity <= 0) {
+      if (quantity <= 0.0) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Quantity must be greater than zero.')),
         );
@@ -149,14 +150,24 @@ class _AddItemScreenState extends State<AddItemScreen> {
                     flex: 3,
                     child: TextFormField(
                       controller: _quantityController,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly, // only allow digits
+                      ],
                       decoration: const InputDecoration(
                         labelText: 'Quantity',
                         border: OutlineInputBorder(),
                       ),
                       validator: (value) {
-                        if (value == null || double.tryParse(value) == null) {
-                          return 'Enter a number';
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a quantity.';
+                        }
+                        final quantity = int.tryParse(value);
+                        if (quantity == null) {
+                          return 'Please enter a valid number.';
+                        }
+                        if(quantity <= 0) {
+                          return 'Quantity must be greater than zero.';
                         }
                         return null;
                       },

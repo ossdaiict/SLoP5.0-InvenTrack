@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'providers/grocery_provider.dart';
 import 'screens/home_screen.dart';
 import 'services/notification_service.dart';
+import 'screens/settings_screen.dart';
 
 final NotificationService notificationService = NotificationService();
   
