@@ -6,6 +6,7 @@ import 'providers/grocery_provider.dart';
 import 'screens/home_screen.dart';
 import 'services/notification_service.dart';
 import 'screens/settings_screen.dart';
+import 'screens/splash_screen.dart';
 
 final NotificationService notificationService = NotificationService();
   
@@ -33,7 +34,7 @@ class GrocyTrackApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
       ),
-      home: const HomeScreen(), // Start with the main screen
+      home: const SplashScreen(), // Start with the main screen
     );
   }
 }
